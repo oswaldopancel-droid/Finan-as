@@ -74,11 +74,14 @@ rankeador_master = Agent(
 t1 = Task(description='Notícias de hoje sobre {ticker} focando em governança e resultados.', expected_output='3 fatos relevantes.', agent=jornalista)
 
 t2 = Task(
-    description='''Acesse o Investsite para {ticker}:
-    1. Extraia P/L, P/VP, ROE, DY atual e Dívida Líquida/EBITDA.
-    2. Calcule o Preço Justo de Graham: Raiz Quadrada de (22,5 * VPA * LPA).
-    3. Identifique se o DY está acima de 6% (Critério Barsi).''',
-    expected_output='Tabela de indicadores + Cálculo do Preço Justo de Graham.',
+    description='''Busque os indicadores para {ticker} seguindo esta ordem de prioridade:
+    1. Tente extrair de: https://www.investsite.com.br/principais_indicadores.php?cod_negociacao={ticker}
+    2. Se falhar, tente: https://statusinvest.com.br/acoes/{ticker} ou https://statusinvest.com.br/fundos-imobiliarios/{ticker}
+    3. Se ainda falhar, tente: https://www.fundamentus.com.br/detalhes.php?papel={ticker}
+
+    DADOS OBRIGATÓRIOS: P/L, P/VP, ROE, DY atual, Dívida Líquida/EBITDA, VPA e LPA.
+    CÁLCULO: Preço Justo de Graham = Raiz Quadrada de (22,5 * VPA * LPA).''',
+    expected_output='Tabela completa de indicadores e o Preço Justo calculado.',
     agent=analista_precisao
 )
 
