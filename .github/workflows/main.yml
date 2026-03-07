@@ -1,0 +1,21 @@
+name: Analise Mensal de Acoes
+on:
+  schedule:
+    - cron: '0 12 1 * *' # Todo dia 01 às 09:00 (Horário de Brasília)
+  workflow_dispatch: # Botão para rodar na hora que quiser
+
+jobs:
+  analise:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+      - name: Instalar dependencias
+        run: pip install -r requirements.txt
+      - name: Executar Robo
+        env:
+          GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
+          SERPER_API_KEY: ${{ secrets.SERPER_API_KEY }}
+        run: python main.py
