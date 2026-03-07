@@ -21,9 +21,11 @@ scrape_tool = ScrapeWebsiteTool()
 
 # 4. AGENTES
 jornalista = Agent(
-    role='Jornalista Financeiro',
-    goal='Encontrar notícias das últimas 48h sobre {ticker}',
-    backstory='Especialista em notícias em tempo real da B3.',
+    role='Analista de Sentimento B3',
+    goal='Analisar o impacto financeiro das notícias de {ticker}',
+    backstory='''Você não apenas lê notícias, você entende o mercado. 
+    Sua tarefa é dar um Score de -10 (muito negativo) a +10 (muito positivo) 
+    para o conjunto de notícias de cada ativo.''',
     tools=[search_tool],
     llm=gemini_llm,
     verbose=True
@@ -109,33 +111,43 @@ for i, res in enumerate(resultados_individuais):
     resumo = sintetizador.execute_task(tarefa_resumo)
     contexto_resumido += f"\n{resumo}\n"
 
-# 10. RANKING FINAL
+# 10. RANKING FINAL (VERSÃO PROFISSIONAL)
 tarefa_ranking = Task(
-    description=f"Ordene de 1 a 10 estas oportunidades resumidas:\n{contexto_resumido}",
-    expected_output="Ranking TOP 10 formatado com medalhas (🥇, 🥈, 🥉) para o top 3.",
+    description=f'''Analise estas 10 oportunidades resumidas:
+    {contexto_resumido}
+    
+    Crie um relatório estruturado seguindo estes critérios:
+    1. Classifique cada ativo com um Score de Sentimento (Baseado nas notícias).
+    2. Atribua um Status: 🟢 (Compra Forte), 🟡 (Aguardar), 🔴 (Risco/Venda).
+    3. Ordene do 1º ao 10º lugar baseado na Margem de Segurança e ROE.''',
+    expected_output='''Um relatório em formato de tabela Markdown contendo:
+    Posição | Ticker | Status | Sentimento (-10 a 10) | P/VP | Justificativa Curta.
+    
+    No final, adicione uma nota de 'Destaque do Mês' para o 1º lugar.''',
     agent=rankeador_master
 )
 
-print("\n### GERANDO RANKING FINAL DE OPORTUNIDADES ###")
+print("\n### GERANDO RELATÓRIO ESTRATÉGICO FINAL ###")
 resultado_final = rankeador_master.execute_task(tarefa_ranking)
 
-# 11. EXIBIÇÃO E NOTIFICAÇÃO
+# 11. EXIBIÇÃO E NOTIFICAÇÃO (FORMATO LIMPO)
 print(resultado_final)
 
-# FUNÇÃO DE ENVIO
 def enviar_notificacao_celular(mensagem):
     TOPICO_NTFY = "48998304145"
     url = f"https://ntfy.sh/{TOPICO_NTFY}"
     try:
+        # Usamos Markdown para que a tabela fique legível no app ntfy
         requests.post(url,
             data=mensagem.encode('utf-8'),
             headers={
-                "Title": "Ranking de Acoes do Mes",
+                "Title": "Relatorio Estrategico B3",
                 "Priority": "high",
-                "Tags": "money_with_wings,chart_with_upwards_trend"
+                "Tags": "chart_with_upwards_trend,moneybag",
+                "Markdown": "yes" 
             }
         )
-        print("✅ Notificação enviada para o celular!")
+        print("✅ Relatório profissional enviado com sucesso!")
     except Exception as e:
         print(f"❌ Erro ao enviar: {e}")
 
