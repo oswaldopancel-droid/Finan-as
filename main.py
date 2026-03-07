@@ -1,9 +1,12 @@
 import os
 import requests
+import smtplib
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
 from crewai import Agent, Task, Crew, LLM
 from crewai_tools import SerperDevTool, ScrapeWebsiteTool
 
-# 1. CONFIGURAÇÃO DAS CHAVES
+# 1. CONFIGURAÇÃO DAS CHAVES (Lendo dos Secrets do GitHub)
 os.environ["SERPER_API_KEY"] = os.getenv("SERPER_API_KEY")
 os.environ["GOOGLE_API_KEY"] = os.getenv("GOOGLE_API_KEY")
 
@@ -19,7 +22,7 @@ gemini_llm = LLM(
 search_tool = SerperDevTool()
 scrape_tool = ScrapeWebsiteTool()
 
-# 4. AGENTES (ALTERADOS PARA VALUE INVESTING)
+# 4. AGENTES (VALUE INVESTING)
 jornalista = Agent(
     role='Analista de Sentimento B3',
     goal='Analisar o impacto financeiro das notícias de {ticker}',
@@ -67,7 +70,7 @@ rankeador_master = Agent(
     verbose=True
 )
 
-# 5. TAREFAS (ALTERADAS PARA CRITÉRIOS DE LONGO PRAZO)
+# 5. TAREFAS
 t1 = Task(description='Notícias de hoje sobre {ticker} focando em governança e resultados.', expected_output='3 fatos relevantes.', agent=jornalista)
 
 t2 = Task(
@@ -95,7 +98,7 @@ equipe_analise = Crew(
 
 # 7. LISTA DE TICKERS
 tickers_para_analise = [
-    {'ticker': 'BTLG11'}, {'ticker': 'MXRF11'}, {'ticker': 'BBSE3'},
+    {'ticker': 'CPFE3'}, {'ticker': 'PSSA3'}, {'ticker': 'BBSE3'},
     {'ticker': 'BBAS3'}, {'ticker': 'ITUB4'}, {'ticker': 'TAEE11'},
     {'ticker': 'EGIE3'}, {'ticker': 'SBSP3'}, {'ticker': 'SAPR11'},
     {'ticker': 'VIVT3'}
@@ -117,7 +120,7 @@ for i, res in enumerate(resultados_individuais):
     resumo = sintetizador.execute_task(tarefa_resumo)
     contexto_resumido += f"\n{resumo}\n"
 
-# 10. RANKING FINAL (MÉTODO BESST + VALOR)
+# 10. RANKING FINAL
 tarefa_ranking = Task(
     description=f'''Analise as oportunidades:
     {contexto_resumido}
@@ -131,9 +134,10 @@ tarefa_ranking = Task(
     agent=rankeador_master
 )
 
-resultado_final = rankeador_master.execute_task(tarefa_ranking)
+resultado_final = str(rankeador_master.execute_task(tarefa_ranking))
 
-# 11. NOTIFICAÇÃO
+# 11. NOTIFICAÇÕES (CELULAR E E-MAIL)
+
 def enviar_notificacao_celular(mensagem):
     TOPICO_NTFY = "48998304145"
     url = f"https://ntfy.sh/{TOPICO_NTFY}"
@@ -141,14 +145,55 @@ def enviar_notificacao_celular(mensagem):
         requests.post(url,
             data=mensagem.encode('utf-8'),
             headers={
-                "Title": "Carteira Previdentiaria - Analise Mensal",
+                "Title": "Carteira Previdenciaria - Analise Mensal",
                 "Priority": "high",
                 "Tags": "gem,moneybag",
                 "Markdown": "yes" 
             }
         )
-        print("✅ Relatório de longo prazo enviado!")
+        print("✅ Notificação ntfy enviada!")
     except Exception as e:
-        print(f"❌ Erro: {e}")
+        print(f"❌ Erro ntfy: {e}")
 
-enviar_notificacao_celular(str(resultado_final))
+def enviar_email_relatorio(mensagem):
+    email_user = os.getenv("EMAIL_USER")
+    email_password = os.getenv("EMAIL_PASSWORD")
+    
+    if not email_user or not email_password:
+        print("⚠️ E-mail não enviado: Credenciais não configuradas nos Secrets.")
+        return
+
+    msg = MIMEMultipart()
+    msg['From'] = email_user
+    msg['To'] = email_user
+    msg['Subject'] = "📊 Relatorio Mensal de Acoes - Buy & Hold"
+
+    # Corpo do e-mail em HTML
+    corpo = f"""
+    <html>
+    <body style="font-family: Arial, sans-serif;">
+        <h2 style="color: #2c3e50;">Ranking Mensal de Oportunidades</h2>
+        <p>Olá! Segue a análise detalhada baseada nos critérios de Barsi e Graham:</p>
+        <div style="background-color: #f4f4f4; padding: 20px; border-radius: 10px;">
+            <pre style="white-space: pre-wrap;">{mensagem}</pre>
+        </div>
+        <br>
+        <p><i>Este relatório é gerado automaticamente pela sua Inteligência Artificial.</i></p>
+    </body>
+    </html>
+    """
+    msg.attach(MIMEText(corpo, 'html'))
+
+    try:
+        with smtplib.SMTP('smtp.gmail.com', 587) as server:
+            server.starttls()
+            server.login(email_user, email_password)
+            server.send_message(msg)
+        print("✅ Relatório enviado por e-mail com sucesso!")
+    except Exception as e:
+        print(f"❌ Erro ao enviar e-mail: {e}")
+
+# Executa as notificações
+print(resultado_final)
+enviar_notificacao_celular(resultado_final)
+enviar_email_relatorio(resultado_final)
