@@ -111,10 +111,15 @@ tickers_para_analise = [
 print(f"### ANALISANDO {len(tickers_para_analise)} ATIVOS ###")
 resultados_individuais = equipe_analise.kickoff_for_each(inputs=tickers_para_analise)
 
-# 9. SINTETIZAÇÃO
+# 9. SINTETIZAÇÃO E PREPARAÇÃO DO RELATÓRIO DETALHADO
 contexto_resumido = ""
+relatorio_detalhado_email = "<h1>Análise Detalhada por Ativo</h1>"
+
+print("\n### PROCESSANDO RESULTADOS PARA CELULAR E E-MAIL ###")
 for i, res in enumerate(resultados_individuais):
     ativo = tickers_para_analise[i]['ticker']
+    
+    # 9a. Criar contexto para o Rankeador (Celular)
     tarefa_resumo = Task(
         description=f"Resuma em 5 linhas os dados de valor e dividendos de {ativo}: {res.raw}",
         expected_output="Resumo técnico focado em Buy & Hold.",
@@ -122,14 +127,22 @@ for i, res in enumerate(resultados_individuais):
     )
     resumo = sintetizador.execute_task(tarefa_resumo)
     contexto_resumido += f"\n{resumo}\n"
+    
+    # 9b. Acumular a análise completa para o E-mail
+    relatorio_detalhado_email += f"""
+    <div style="border-bottom: 1px solid #ccc; padding: 10px;">
+        <h2 style="color: #2c3e50;">{ativo}</h2>
+        <div style="white-space: pre-wrap;">{res.raw}</div>
+    </div>
+    """
 
-# 10. RANKING FINAL
+# 10. RANKING FINAL (PARA O CELULAR)
 tarefa_ranking = Task(
     description=f'''Analise as oportunidades:
     {contexto_resumido}
     
     Crie o ranking seguindo:
-    1. Prioridade para Setor BESST (Bancos, Energia, Saneamento, Seguros, Telecom).
+    1. Prioridade para Setor BESST.
     2. Melhor relação Preço Atual vs Preço Justo de Graham.
     3. Status: 🟢 (Desconto > 20%), 🟡 (Preço Justo), 🔴 (Caro/Arriscado).''',
     expected_output='''Tabela Markdown:
@@ -137,66 +150,73 @@ tarefa_ranking = Task(
     agent=rankeador_master
 )
 
-resultado_final = str(rankeador_master.execute_task(tarefa_ranking))
+resultado_ranking_celular = str(rankeador_master.execute_task(tarefa_ranking))
 
-# 11. NOTIFICAÇÕES (CELULAR E E-MAIL)
+# 11. NOTIFICAÇÕES (DIFERENCIADAS)
 
-def enviar_notificacao_celular(mensagem):
+def enviar_notificacao_celular(mensagem_tabela):
     TOPICO_NTFY = "48998304145"
     url = f"https://ntfy.sh/{TOPICO_NTFY}"
     try:
         requests.post(url,
-            data=mensagem.encode('utf-8'),
+            data=mensagem_tabela.encode('utf-8'),
             headers={
-                "Title": "Carteira Previdenciaria - Analise Mensal",
+                "Title": "Ranking Estratégico B3",
                 "Priority": "high",
-                "Tags": "gem,moneybag",
+                "Tags": "chart_with_upwards_trend,moneybag",
                 "Markdown": "yes" 
             }
         )
-        print("✅ Notificação ntfy enviada!")
+        print("✅ Ranking enviado para o celular!")
     except Exception as e:
         print(f"❌ Erro ntfy: {e}")
 
-def enviar_email_relatorio(mensagem):
+def enviar_email_relatorio_completo(tabela_ranking, analise_detalhada):
     email_user = os.getenv("EMAIL_USER")
     email_password = os.getenv("EMAIL_PASSWORD")
     
     if not email_user or not email_password:
-        print("⚠️ E-mail não enviado: Credenciais não configuradas nos Secrets.")
+        print("⚠️ E-mail não enviado: Credenciais ausentes.")
         return
 
     msg = MIMEMultipart()
     msg['From'] = email_user
     msg['To'] = email_user
-    msg['Subject'] = "📊 Relatorio Mensal de Acoes - Buy & Hold"
+    msg['Subject'] = "📊 Relatório Completo de Investimentos - Buy & Hold"
 
-    # Corpo do e-mail em HTML
-    corpo = f"""
+    # Corpo do e-mail unindo a Tabela + Análises Detalhadas
+    corpo_html = f"""
     <html>
-    <body style="font-family: Arial, sans-serif;">
-        <h2 style="color: #2c3e50;">Ranking Mensal de Oportunidades</h2>
-        <p>Olá! Segue a análise detalhada baseada nos critérios de Barsi e Graham:</p>
-        <div style="background-color: #f4f4f4; padding: 20px; border-radius: 10px;">
-            <pre style="white-space: pre-wrap;">{mensagem}</pre>
+    <body style="font-family: Calibri, sans-serif; line-height: 1.6;">
+        <h1 style="color: #1a5276;">Relatório Estratégico Mensal</h1>
+        <p>Abaixo o ranking consolidado e, em seguida, a análise profunda de cada ativo.</p>
+        
+        <div style="background-color: #f8f9fa; border: 1px solid #dcdcdc; padding: 15px; border-radius: 5px;">
+            <h2 style="color: #2c3e50;">Ranking de Alocação</h2>
+            <pre style="font-size: 14px;">{tabela_ranking}</pre>
         </div>
+        
+        <hr style="margin: 30px 0;">
+        
+        {analise_detalhada}
+        
         <br>
-        <p><i>Este relatório é gerado automaticamente pela sua Inteligência Artificial.</i></p>
+        <p style="font-size: 12px; color: #7f8c8d;"><i>Gerado automaticamente via CrewAI & Gemini LLM.</i></p>
     </body>
     </html>
     """
-    msg.attach(MIMEText(corpo, 'html'))
+    msg.attach(MIMEText(corpo_html, 'html'))
 
     try:
         with smtplib.SMTP('smtp.gmail.com', 587) as server:
             server.starttls()
             server.login(email_user, email_password)
             server.send_message(msg)
-        print("✅ Relatório enviado por e-mail com sucesso!")
+        print("✅ E-mail detalhado enviado com sucesso!")
     except Exception as e:
         print(f"❌ Erro ao enviar e-mail: {e}")
 
-# Executa as notificações
-print(resultado_final)
-enviar_notificacao_celular(resultado_final)
-enviar_email_relatorio(resultado_final)
+# Execução final
+print(resultado_ranking_celular)
+enviar_notificacao_celular(resultado_ranking_celular)
+enviar_email_relatorio_completo(resultado_ranking_celular, relatorio_detalhado_email)
