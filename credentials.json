@@ -7,7 +7,7 @@ creds = ServiceAccountCredentials.from_json_keyfile_name('credentials.json', sco
 client = gspread.authorize(creds)
 
 # Abre a planilha pelo nome exato
-ss = client.open("NOME_EXATO_DA_SUA_PLANILHA")
+ss = client.open("FINANCEIRO 2026")
 sheet = ss.sheet1 # Seleciona a primeira aba
 
 # Exemplo: Lendo tickers da Coluna A e limpando dados
