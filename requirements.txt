@@ -1,3 +1,6 @@
 crewai[google-genai]
 crewai[tools]
 requests
+gspread
+oauth2client
+beautifulsoup4
