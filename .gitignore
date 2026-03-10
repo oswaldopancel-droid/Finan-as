@@ -1,1 +1,13 @@
-credentials.json
+{
+  "type": "service_account",
+  "project_id": "planilha-financeira-489804",
+  "private_key_id": "fcee8170fc5ef11f0fa23b811be4ea113480e570",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQDAfTPqYK0tF7RH\nvzQxsT6fOE54DLejiiAyVJE59gD5EiceXSUmmcwHgvZANriGIfStW7SziN+N3T+s\nfjzDRcjlrpEe8Xw/TzpqIzU2fWHffA4X+OyhlFbj77oJuXLcjR6dgesM2ArdOB6v\njBWykCouZUds1J49C2bK/9Vpqfh9Dth+8n+bvQ1xSvfKVysYs9ZN6fcZkVBz6Uw9\nEomIxgAaLtQ/bu9jS6oh0ABRnICdziZBVujwO4rxYeYn6JQ4+KSymWjpUnM0yypU\nUa1qUc0eMGlsxb7YSVcdCP4sL8XRMROkB0RcqswSo8h0BYz35a/B5z5fWiq/DFia\nivZxmcVpAgMBAAECggEAB+3gZ++S6ABJo9740RyNCNVdSM1f+d5PFI5ZQSWkxUh9\n0LQOO2MrKBq5TCHfmLQ+C69zEnuOl0hy6Vx14lFgmjLbtYZFvlHkL8ptfxDL1FSc\nPAPms4KUew/n/k3jsQ7Qdl/gr9xtGM8erHqSdj2Wuec1ea00gNfpucOvezUjkFCB\nnqK3NiMHyq7fsd0H/jk8V5eeDcpC4+PVi4DSrdqArirsaeDlL2oiJ6AKy7dbxBjX\nqIdQKLCCAGz9BxET6dyq/lqSyWjb/UXSfmXhvVFGzZmaBXwE38tBDZEftg8FVoBe\nuQ+tXt9F5+pKZD1sEndpFfMK3MOzEIvsnAOq5MmAUQKBgQDeoWjsHSNZhMS4Z1Ns\nq/gB9VB+9y6qsTQqR8QX/xMJL8c08P2BsGzLs8wvgsrTIQTZkDV1x6A33btocMDx\nhWg0rrfmw1cS3HLMiAEkoTRNcT89YnGtcsBA24OiTjL19lwzvBlSTumjd+nkf49N\ntZCVhcXdvdzLxkk9D6byU8gIJQKBgQDdVzszYtMsqk3SVF/FUqqUo5RZwE4JiQws\ne8x7dk49XxQ28+rtRjNmbxIoYyUMNSJ1r1z/uQ8jEbkhAGHsk7XoYSsEaPaIsnLA\nFKnI3pN7rEWCOr/R8Z0cHtxiG7655n3FYHqwurhkdCUMBChVVSg6kXZL8gHkNhWX\nhKtJdGvy9QKBgD5wzOm0Pm7kEvyZVkebb+K0uA/0Ke2L59KX8EK+sssX0Gpj0OYn\n4ku7sN/+cf6HO0H99VCEXcZtdRuUzDixLwnfmwqo7OoIVFZTKuboI7A4vADudG2u\nSoemSaQjBJ4Bq9iCwCNaqKLFhh8lO78S1mtpapaHor6wbWgn1K4Qm4DVAoGASTGX\neh6sBpEquur74Jy9m/mcDTHynGSdifhGXm144gKXBLUUcvJL/QutzX07uxW3F4Ou\nFUJ1JvutZKRjvX/7H6VCPGsZW4rnN22d17cCvlrxgWc8F4j2k14BMtBJ+d+mp6aH\n6/lTEKT3u0mErPNEIloH7IVS6syXx0sv+VJugCECgYEApulRD/qBTcS/3+FaQH+q\nsGhkEHMSM5KrJ7w6f40jOYkFc8VbWpLbJJdLdOjq4E+R+tvRTZ5NA8xpI3FmCfsf\ndD/AvnhMPkOXkg/7G5G/s1rT2e2L+a9jgAht4S0sJbS4Q5FhT0UD3huZOv38BFas\ngDqlbuojtzkf8Ttz6aneCPk=\n-----END PRIVATE KEY-----\n",
+  "client_email": "planilha-financeira@planilha-financeira-489804.iam.gserviceaccount.com",
+  "client_id": "106167118984308996254",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/planilha-financeira%40planilha-financeira-489804.iam.gserviceaccount.com",
+  "universe_domain": "googleapis.com"
+}
